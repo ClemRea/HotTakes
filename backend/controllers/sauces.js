@@ -45,25 +45,29 @@ exports.modifySauce = (req, res, next) => {
 
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      if (req.file) {
-        const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, () => {
-          // Ajoutez la nouvelle image après avoir supprimé l'ancienne image
+      if (sauce.userId != req.auth.userId) {
+        res.status(401).json({ message: "Not authorized" });
+      } else {
+        if (req.file) {
+          const filename = sauce.imageUrl.split("/images/")[1];
+          fs.unlink(`images/${filename}`, () => {
+            // Ajoutez la nouvelle image après avoir supprimé l'ancienne image
+            Sauce.updateOne(
+              { _id: req.params.id },
+              { ...sauceObject, _id: req.params.id }
+            )
+              .then(res.status(200).json({ message: "Sauce modifiée" }))
+              .catch((error) => res.status(400).json({ error }));
+          });
+        } else {
+          // Si aucune nouvelle image n'a été téléchargée, mettez simplement à jour la sauce
           Sauce.updateOne(
             { _id: req.params.id },
             { ...sauceObject, _id: req.params.id }
           )
             .then(res.status(200).json({ message: "Sauce modifiée" }))
             .catch((error) => res.status(400).json({ error }));
-        });
-      } else {
-        // Si aucune nouvelle image n'a été téléchargée, mettez simplement à jour la sauce
-        Sauce.updateOne(
-          { _id: req.params.id },
-          { ...sauceObject, _id: req.params.id }
-        )
-          .then(res.status(200).json({ message: "Sauce modifiée" }))
-          .catch((error) => res.status(400).json({ error }));
+        }
       }
     })
     .catch((error) => res.status(500).json({ error }));

@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const mongooseError = require("mongoose-error");
 require("dotenv").config();
 
 exports.signup = (req, res, next) => {
@@ -16,9 +17,15 @@ exports.signup = (req, res, next) => {
       user
         .save()
         .then(() => res.status(201).json({ message: "Utilisateur créé !" }))
-        .catch((error) => res.status(400).json({ error }));
+        .catch((error) => {
+          throw mongooseError(error);
+          // res.status(400).json({ error : error });
+        });
     })
-    .catch((error) => res.status(500).json({ error }));
+    .catch((error) => {
+      throw mongooseError(error);
+      // res.status(500).json({ error : error });
+    });
 };
 
 exports.login = (req, res, next) => {
@@ -44,7 +51,13 @@ exports.login = (req, res, next) => {
             ),
           });
         })
-        .catch((error) => res.status(500).json({ error }));
+        .catch((error) => {
+          throw mongooseError(error);
+          // res.status(500).json({ error : error });
+        });
     })
-    .catch((error) => res.status(500).json({ error }));
+    .catch((error) => {
+      throw mongooseError(error);
+      // res.status(500).json({ error : error });
+    });
 };

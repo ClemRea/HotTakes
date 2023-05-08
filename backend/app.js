@@ -42,10 +42,14 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
+app.use("/api", limiter);
 app.use("/api/auth", userRoutes);
 app.use("/api/sauces", saucesRoutes);
 app.use("/images", express.static(path.join(__dirname, "images")));
-app.use(helmet());
-app.use("/api", limiter);
 
 module.exports = app;

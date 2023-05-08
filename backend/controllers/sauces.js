@@ -1,5 +1,6 @@
 const Sauce = require("../models/Sauce");
 const fs = require("fs");
+const mongooseError = require("mongoose-error");
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
@@ -17,7 +18,8 @@ exports.createSauce = (req, res, next) => {
       res.status(201).json({ message: "Objet enregistré !" });
     })
     .catch((error) => {
-      res.status(400).json({ error });
+      throw mongooseError(error);
+      // res.status(400).json({ error : error });
     });
 };
 
@@ -27,9 +29,8 @@ exports.getAllStuff = (req, res, next) => {
       res.status(200).json(things);
     })
     .catch((error) => {
-      res.status(400).json({
-        error: error,
-      });
+      throw mongooseError(error);
+      // res.status(400).json({ error : error });
     });
 };
 
@@ -66,7 +67,10 @@ exports.modifySauce = (req, res, next) => {
             { ...sauceObject, _id: req.params.id }
           )
             .then(res.status(200).json({ message: "Sauce modifiée" }))
-            .catch((error) => res.status(400).json({ error }));
+            .catch((error) => {
+              throw mongooseError(error);
+              // res.status(400).json({ error : error });
+            });
         }
       }
     })
@@ -97,7 +101,10 @@ exports.deleteSauce = (req, res, next) => {
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => res.status(200).json(sauce))
-    .catch((error) => res.status(404).json({ error }));
+    .catch((error) => {
+      throw mongooseError(error);
+      // res.status(400).json({ error : error });
+    });
 };
 
 exports.likeDislikeSauce = (req, res, next) => {
@@ -112,7 +119,10 @@ exports.likeDislikeSauce = (req, res, next) => {
         { $push: { usersLiked: userId }, $inc: { likes: +1 } }
       )
         .then(() => res.status(200).json({ message: `J'aime` }))
-        .catch((error) => res.status(400).json({ error }));
+        .catch((error) => {
+          throw mongooseError(error);
+          // res.status(400).json({ error : error });
+        });
 
       break;
 
@@ -125,7 +135,10 @@ exports.likeDislikeSauce = (req, res, next) => {
               { $pull: { usersLiked: userId }, $inc: { likes: -1 } }
             )
               .then(() => res.status(200).json({ message: `Neutre` }))
-              .catch((error) => res.status(400).json({ error }));
+              .catch((error) => {
+                throw mongooseError(error);
+                // res.status(400).json({ error : error });
+              });
           }
           if (sauce.usersDisliked.includes(userId)) {
             Sauce.updateOne(
@@ -133,10 +146,16 @@ exports.likeDislikeSauce = (req, res, next) => {
               { $pull: { usersDisliked: userId }, $inc: { dislikes: -1 } }
             )
               .then(() => res.status(200).json({ message: `Neutre` }))
-              .catch((error) => res.status(400).json({ error }));
+              .catch((error) => {
+                throw mongooseError(error);
+                // res.status(400).json({ error : error });
+              });
           }
         })
-        .catch((error) => res.status(404).json({ error }));
+        .catch((error) => {
+          throw mongooseError(error);
+          // res.status(400).json({ error : error });
+        });
       break;
 
     case -1:
@@ -147,7 +166,10 @@ exports.likeDislikeSauce = (req, res, next) => {
         .then(() => {
           res.status(200).json({ message: `Je n'aime pas` });
         })
-        .catch((error) => res.status(400).json({ error }));
+        .catch((error) => {
+          throw mongooseError(error);
+          // res.status(400).json({ error : error });
+        });
       break;
 
     default:
